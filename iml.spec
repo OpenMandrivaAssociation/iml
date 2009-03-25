@@ -15,6 +15,8 @@ BuildRequires:	libatlas-devel
 
 Provides:	lib%{name}-devel = %{version}-%{release}
 
+Patch0:		iml-1.0.2.build.patch
+
 %description
 IML is a free library of C source code which implements algorithms for
 computing exact solutions to dense systems of linear equations over the
@@ -24,8 +26,12 @@ GMP bignum library.
 %prep
 %setup -q
 
+%patch0 -p1
+rm -f config/*.m4
+
 %build
-%configure2_5x						\
+autoreconf -ifs
+%configure						\
 	--with-atlas-include=%{_includedir}/atlas	\
 	--with-atlas-lib=%{_libdir}/atlas
 
