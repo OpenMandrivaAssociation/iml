@@ -5,7 +5,7 @@ Group:		Sciences/Mathematics
 License:	BSDish
 Summary:	IML - Integer Matrix Library
 Version:	1.0.2
-Release:	%mkrel 1
+Release:	%mkrel 2
 Source:		http://www.cs.uwaterloo.ca/~z4chen/iml-1.0.2.tar.gz
 URL:		http://www.cs.uwaterloo.ca/~z4chen/iml.html
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
