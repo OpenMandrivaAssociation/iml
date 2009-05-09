@@ -5,7 +5,7 @@ Group:		Sciences/Mathematics
 License:	BSDish
 Summary:	IML - Integer Matrix Library
 Version:	1.0.2
-Release:	%mkrel 2
+Release:	%mkrel 3
 Source:		http://www.cs.uwaterloo.ca/~z4chen/iml-1.0.2.tar.gz
 URL:		http://www.cs.uwaterloo.ca/~z4chen/iml.html
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -16,6 +16,7 @@ BuildRequires:	libatlas-devel
 Provides:	lib%{name}-devel = %{version}-%{release}
 
 Patch0:		iml-1.0.2.build.patch
+Patch1:		iml-1.0.2.nullspaceMP.patch
 
 %description
 IML is a free library of C source code which implements algorithms for
@@ -28,6 +29,8 @@ GMP bignum library.
 
 %patch0 -p1
 rm -f config/*.m4
+
+%patch1 -p1
 
 %build
 autoreconf -ifs
