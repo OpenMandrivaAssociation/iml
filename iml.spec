@@ -5,7 +5,7 @@ Group:		Sciences/Mathematics
 License:	BSDish
 Summary:	IML - Integer Matrix Library
 Version:	1.0.2
-Release:	%mkrel 3
+Release:	%mkrel 4
 Source:		http://www.cs.uwaterloo.ca/~z4chen/iml-1.0.2.tar.gz
 URL:		http://www.cs.uwaterloo.ca/~z4chen/iml.html
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -38,7 +38,7 @@ autoreconf -ifs
 	--with-atlas-include=%{_includedir}/atlas	\
 	--with-atlas-lib=%{_libdir}/atlas
 
-%make
+%make CFLAGS="%{optflags} -fPIC"
 
 %install
 %makeinstall_std
