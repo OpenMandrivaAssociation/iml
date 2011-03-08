@@ -9,7 +9,7 @@ Group:		Sciences/Mathematics
 License:	BSD-like
 Summary:	IML - Integer Matrix Library
 Version:	1.0.3
-Release:	%mkrel 1
+Release:	%mkrel 2
 Source:		http://www.cs.uwaterloo.ca/~astorjoh/iml-1.0.3.tar.gz
 URL:		http://www.cs.uwaterloo.ca/~astorjoh/iml.html
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -51,6 +51,7 @@ IML - Integer Matrix Library library.
 Group:		Development/C
 Summary:	IML - Integer Matrix Library development files
 Provides:	%{name}-devel = %{version}-%{release}
+Requires:	%{libname} = %{version}-%{release}
 
 %description	-n %{devname}
 IML- Integer Matrix Library development files.
