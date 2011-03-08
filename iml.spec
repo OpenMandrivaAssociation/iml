@@ -1,3 +1,5 @@
+%define _requires_exceptions	devel(libcblas
+
 %define name	iml
 %define libname	%{mklibname %name 0}
 %define devname	%{mklibname %name -d}
