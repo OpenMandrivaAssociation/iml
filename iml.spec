@@ -9,7 +9,7 @@ Group:		Sciences/Mathematics
 License:	BSD-like
 Summary:	IML - Integer Matrix Library
 Version:	1.0.3
-Release:	%mkrel 2
+Release:	%mkrel 3
 Source:		http://www.cs.uwaterloo.ca/~astorjoh/iml-1.0.3.tar.gz
 URL:		http://www.cs.uwaterloo.ca/~astorjoh/iml.html
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -59,7 +59,6 @@ IML- Integer Matrix Library development files.
 %files		-n %{devname}
 %defattr(-,root,root)
 %{_includedir}/%{name}.h
-%{_libdir}/*.la
 %{_libdir}/*.so
 
 #-----------------------------------------------------------------------
@@ -79,11 +78,12 @@ autoreconf -ifs
 	--disable-static				\
 	--enable-shared
 
-%make CFLAGS="%{optflags} -fPIC"
+%make
 
 #-----------------------------------------------------------------------
 %install
 %makeinstall_std
+rm %{buildroot}%{_libdir}/*.la
 
 mkdir -p %{buildroot}%{_docdir}
 mv -f %{buildroot}%{_datadir}/%{name} %{buildroot}%{_docdir}
