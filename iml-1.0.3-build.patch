@@ -1,0 +1,139 @@
+--- iml-1.0.3/configure.ac.orig	2011-03-07 20:03:25.520570995 -0300
++++ iml-1.0.3/configure.ac	2011-03-07 20:05:12.325570997 -0300
+@@ -2,9 +2,8 @@ dnl Autoconf
+ 
+ AC_PREREQ(2.59)
+ AC_INIT(IML, 1.0.3)
+-AC_CONFIG_AUX_DIR(config)
+ AM_CONFIG_HEADER(config.h:config-h.in)
+-AC_CONFIG_SRCDIR([src/RNSop.c])
++AC_CONFIG_SRCDIR([Makefile.am])
+ AM_INIT_AUTOMAKE
+ 
+ # Adds special linker flag for icc
+@@ -26,10 +25,6 @@ AC_HEADER_STDC
+ AC_DISABLE_SHARED
+ AM_PROG_LIBTOOL
+ 
+-DEFAULT_CFLAGS="-O3 -Wall"
+-${CFLAGS:=$DEFAULT_CFLAGS}
+-CFLAGS="-I. ${CFLAGS}"
+-
+ AC_CHECK_HEADERS([stdlib.h time.h])
+ 
+ AC_CHECK_HEADERS([math.h],, [echo 'error: could not find required header math.h, configuration aborted.'  exit 1])
+@@ -45,20 +40,78 @@ AC_CHECK_FUNCS(bzero memset, break)
+ 
+ AC_CHECK_FUNCS(calloc floor)
+ 
+-IML_VERBOSE_MODE
+-IML_DEFAULT_PATH
+-IML_CHECK_GMP(,,[AC_MSG_ERROR(
+-GMP not found! 
+-GMP version 3.1.1 or greater is required for this library to compile. 
+-Please make sure GMP is installed and specify the header and libraries 
+-location with the options --with-gmp-include=<path> and --with-gmp-lib=<path>
+-respectively when running configure.
+-)])
+-
+-IML_CHECK_ATLAS(,,[AC_MSG_ERROR(
+-ATLAS not found! 
+-ATLAS version 3.0 or greater is required for this library to compile. Please make sure ATLAS is installed and specify the header and libraries location with the options --with-atlas-include=<path> and --with-atlas-lib=<path> respectively when running configure.
+-)])
++AC_ARG_ENABLE(verbose-mode,
++    [ --enable-verbose-mode
++    The program will output additional information such as
++    timings, intermidate results and so on.],
++    [AC_DEFINE([HAVE_VERBOSE_MODE], [1], [make verbose output])],
++    [])
++
++AC_ARG_WITH(default,
++    [ --with-default=<path>
++    Add <path> to the default path for package GMP and
++    ATLAS searching. The default path without setting this
++    argument is /usr and /usr/local],
++    [DEFAULT_PATH="$withval"],
++    [DEFAULT_PATH="/usr"])
++
++#=========================================================================
++AC_ARG_WITH(gmp-include,
++    [ --with-gmp-include=<path>
++    Specify the path of GMP header gmp.h
++    If argument is <empty> that means the header is reachable
++    with the default search path: /usr/include or /usr/local/include
++    or other path you add as default path using --with-default.
++    Otherwise you give the <path> to the directory which contains
++    the header gmp.h.],
++    [GMP_HEADER_PATH=$withval],
++    [GMP_HEADER_PATH="${DEFAULT_PATH}/include"])
++
++AC_ARG_WITH(gmp-lib,
++    [ --with-gmp-lib=<path>
++    Specify the path of GMP library.
++    If argument is <empty> that means the header is reachable
++    with the default search path: /usr/include or /usr/local/include
++    or path you add as default path using --with-default.
++    Otherwise you give the <path> to the directory which contains
++    the GMP library.],
++    [GMP_LIBRARY_PATH=$withval],
++    [GMP_LIBRARY_PATH="${DEFAULT_PATH}/lib"])
++
++GMP_CFLAGS="-I${GMP_HEADER_PATH}"
++GMP_LIBS="-L${GMP_LIBRARY_PATH} -lgmp"
++AC_SUBST(GMP_CFLAGS)
++AC_SUBST(GMP_LIBS)
++#-------------------------------------------------------------------------
++
++#=========================================================================
++AC_ARG_WITH(atlas-include,
++    [ --with-atlas-include=<path>
++    Specify the path of ATLAS header cblas.h
++    If argument is <empty> that means the header is reachable
++    with the default search path: /usr/include or /usr/local/include
++    or other path you add as default path using --with-default.
++    Otherwise you give the <path> to the directory which contains
++    the ATLAS header cblas.h.],
++    [ATLAS_HEADER_PATH=$withval],
++    [ATLAS_HEADER_PATH="${DEFAULT_PATH}/include"])
++
++AC_ARG_WITH(atlas-lib,
++    [ --with-atlas-lib=<path>
++    Specify the path of ATLAS library.
++    If argument is <empty> that means the header is reachable
++    with the default search path: /usr/include or /usr/local/include
++    or path you add as default path using --with-default.
++    Otherwise you give the <path> to the directory which contains
++    the ATLAS library.],
++    [ATLAS_LIBRARY_PATH=$withval],
++    [ATLAS_LIBRARY_PATH="${DEFAULT_PATH}/lib"])
++
++ATLAS_CFLAGS="-I${ATLAS_HEADER_PATH}"
++ATLAS_LIBS="-L${ATLAS_LIBRARY_PATH} -lcblas -latlas"
++AC_SUBST(ATLAS_CFLAGS)
++AC_SUBST(ATLAS_LIBS)
++#-------------------------------------------------------------------------
+ 
+ AC_SUBST(LDFLAGS)
+ AC_SUBST(ac_aux_dir)
+--- iml-1.0.3/src/Makefile.am.orig	2011-03-07 20:05:49.014571003 -0300
++++ iml-1.0.3/src/Makefile.am	2011-03-07 20:06:12.762570999 -0300
+@@ -1,6 +1,6 @@
+-AM_CFLAGS = $(GMP_CFLAGS) $(ATLAS_CFLAGS)
++AM_CFLAGS = @GMP_CFLAGS@ @ATLAS_CFLAGS@
+ 
+-EXTERNLIB = $(GMP_LIBS) $(ATLAS_LIBS) 
++EXTERNLIB = @GMP_LIBS@ @ATLAS_LIBS@
+ 
+ include_HEADERS = iml.h
+ 
+--- iml-1.0.3/tests/Makefile.am.orig	2011-03-07 20:06:29.095570998 -0300
++++ iml-1.0.3/tests/Makefile.am	2011-03-07 20:06:54.587571006 -0300
+@@ -1,6 +1,6 @@
+-AM_CFLAGS = -I/$(top_srcdir)/src  $(GMP_CFLAGS) $(ATLAS_CFLAGS)
++AM_CFLAGS = -I/$(top_srcdir)/src  @GMP_CFLAGS@ @ATLAS_CFLAGS@
+ 
+-TESTLIB = $(top_builddir)/src/libiml.la $(ATLAS_LIBS) $(GMP_LIBS)
++TESTLIB = $(top_builddir)/src/libiml.la @ATLAS_LIBS@ @GMP_LIBS@
+ 
+ TESTS = test-smallentry$(EXEEXT) test-largeentry$(EXEEXT)
+ 

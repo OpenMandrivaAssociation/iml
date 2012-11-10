@@ -1,0 +1,11 @@
+--- iml-1.0.3/src/nullspace.c.orig	2011-03-07 20:18:40.825571004 -0300
++++ iml-1.0.3/src/nullspace.c	2011-03-07 20:18:58.243571003 -0300
+@@ -253,7 +253,7 @@ nullspaceMP(const long n, const long m,
+ 	    for (i = 0; i < m; i++) {
+ 		for (j = 0; j < m; j++)
+ 		    mpz_init_set_ui(mp_N[i * m + j], 0);
+-		mpz_init_ui(mp_N[i * m + i], 1);
++		mpz_set_ui(mp_N[i * m + i], 1);
+ 	    }
+ 	    *mp_N_pass = mp_N;
+ 	} else {		/* r>0 and s>0 */
