@@ -1,20 +1,22 @@
-%define _requires_exceptions	devel(libcblas
+%if %{_use_internal_dependency_generator}
+%define __noautoreq 'devel\\(libcblas(.*)'
+%else
+%define _requires_exceptions devel(libcblas
+%endif
 
-%define name	iml
-%define libname	%{mklibname %name 0}
-%define devname	%{mklibname %name -d}
+%define libname	%mklibname %{name} 0
+%define devname	%mklibname %{name} -d
 
-Name:		%{name}
+Summary:	IML - Integer Matrix Library
+Name:		iml
+Version:	1.0.3
+Release:	4
 Group:		Sciences/Mathematics
 License:	BSD-like
-Summary:	IML - Integer Matrix Library
-Version:	1.0.3
-Release:	%mkrel 3
-Source:		http://www.cs.uwaterloo.ca/~astorjoh/iml-1.0.3.tar.gz
 URL:		http://www.cs.uwaterloo.ca/~astorjoh/iml.html
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
+Source:		http://www.cs.uwaterloo.ca/~astorjoh/iml-1.0.3.tar.gz
 
-BuildRequires:	libgmp-devel
+BuildRequires:	gmp-devel
 BuildRequires:	libatlas-devel
 
 Patch0:		iml-1.0.3-build.patch
@@ -27,7 +29,6 @@ integers. IML is designed to be used with the ATLAS/BLAS library and
 GMP bignum library. 
 
 %files
-%defattr(-,root,root)
 %dir %{_docdir}/%{name}
 %{_docdir}/%{name}/*
 %dir %{_datadir}/%{name}/examples
@@ -43,7 +44,6 @@ Provides:	libname%{name}-devel = %{version}-%{release}
 IML - Integer Matrix Library library.
 
 %files		-n %{libname}
-%defattr(-,root,root)
 %{_libdir}/*.so.*
 
 #-----------------------------------------------------------------------
@@ -57,7 +57,6 @@ Requires:	%{libname} = %{version}-%{release}
 IML- Integer Matrix Library development files.
 
 %files		-n %{devname}
-%defattr(-,root,root)
 %{_includedir}/%{name}.h
 %{_libdir}/*.so
 
@@ -83,13 +82,9 @@ autoreconf -ifs
 #-----------------------------------------------------------------------
 %install
 %makeinstall_std
-rm %{buildroot}%{_libdir}/*.la
 
 mkdir -p %{buildroot}%{_docdir}
 mv -f %{buildroot}%{_datadir}/%{name} %{buildroot}%{_docdir}
 mkdir -p %{buildroot}%{_datadir}/%{name}/examples
 cp -fa examples/*.c examples/readme %{buildroot}%{_datadir}/%{name}/examples
 
-#-----------------------------------------------------------------------
-%clean
-rm -rf %{buildroot}
