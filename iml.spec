@@ -1,7 +1,7 @@
 %if %{_use_internal_dependency_generator}
-%define __noautoreq 'devel\\(libcblas(.*)'
+%define __noautoreq 'devel\\(libcblas(.*)|libcblas\\.so\\..*'
 %else
-%define _requires_exceptions devel(libcblas
+%define _requires_exceptions devel(libcblas\\|libcblas\.so\..*
 %endif
 
 %define libname	%mklibname %{name} 0
@@ -10,7 +10,7 @@
 Summary:	IML - Integer Matrix Library
 Name:		iml
 Version:	1.0.3
-Release:	5
+Release:	6
 License:	BSD-like
 URL:		http://www.cs.uwaterloo.ca/~astorjoh/iml.html
 Source:		http://www.cs.uwaterloo.ca/~astorjoh/iml-1.0.3.tar.gz
@@ -87,4 +87,3 @@ mkdir -p %{buildroot}%{_docdir}
 mv -f %{buildroot}%{_datadir}/%{name} %{buildroot}%{_docdir}
 mkdir -p %{buildroot}%{_datadir}/%{name}/examples
 cp -fa examples/*.c examples/readme %{buildroot}%{_datadir}/%{name}/examples
-
