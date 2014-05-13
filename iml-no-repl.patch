@@ -1,0 +1,22 @@
+--- src/Makefile.in.orig	2008-07-28 08:53:18.000000000 -0600
++++ src/Makefile.in	2011-04-26 11:53:12.571156023 -0600
+@@ -62,8 +62,7 @@
+ LTLIBRARIES = $(lib_LTLIBRARIES)
+ am__DEPENDENCIES_1 =
+ am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+-libiml_la_DEPENDENCIES = $(am__DEPENDENCIES_2) \
+-	$(top_builddir)/repl/librepl.la
++libiml_la_DEPENDENCIES = $(am__DEPENDENCIES_2)
+ am_libiml_la_OBJECTS = libiml_la-basisop.lo libiml_la-certsolve.lo \
+ 	libiml_la-error.lo libiml_la-latreduce.lo \
+ 	libiml_la-memalloc.lo libiml_la-mtrans.lo \
+@@ -220,8 +219,7 @@
+ 	            nullspace.c
+ 
+ libiml_la_CFLAGS = $(AM_CFLAGS)
+-libiml_la_LIBADD = $(EXTERNLIB) \
+-	 	   $(top_builddir)/repl/librepl.la
++libiml_la_LIBADD = $(EXTERNLIB)
+ 
+ all: all-am
+ 

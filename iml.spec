@@ -1,89 +1,105 @@
 %if %{_use_internal_dependency_generator}
-%define __noautoreq 'devel\\(libcblas(.*)|libcblas\\.so\\..*'
+%define __noautoreq 'devel\\(libsatlas(.*)|libsatlas\\.so\\..*'
 %else
-%define _requires_exceptions devel(libcblas\\|libcblas\.so\..*
+%define _requires_exceptions devel(libsatlas\\|libsatlas\.so\..*
 %endif
+%define old_libname	%mklibname %{name} 0
+%define old_devname	%mklibname %{name} -d
 
-%define libname	%mklibname %{name} 0
-%define devname	%mklibname %{name} -d
+Name:           iml
+Version:        1.0.3
+Release:        8%{?dist}
+Summary:        Finds solutions to systems of linear equations over integers
 
-Summary:	IML - Integer Matrix Library
-Name:		iml
-Version:	1.0.3
-Release:	6
-License:	BSD-like
-URL:		http://www.cs.uwaterloo.ca/~astorjoh/iml.html
-Source:		http://www.cs.uwaterloo.ca/~astorjoh/iml-1.0.3.tar.gz
+License:        BSD
+URL:            https://cs.uwaterloo.ca/~astorjoh/iml.html
+Source0:        https://cs.uwaterloo.ca/~astorjoh/%{name}-%{version}.tar.gz
+Source1:        %{name}.rpmlintrc
+# This patch will not be sent upstream, as it is Fedora specific.  Configure
+# checks whether the system realloc() has either of two bugs and, if so,
+# uses a wrapper around realloc() to work around the bugs.  Glibc does not
+# have those bugs, so the wrapper is unnecessary.  However, it gets linked
+# into the final library anyway.  The wrapper code is GPLv2+ and iml is BSD.
+# Since the workaround is not used on Fedora systems anyway, this patch
+# prevents it from being linked in, allowing iml to remain straight BSD.
+Patch0:         %{name}-no-repl.patch
+# Support building on aarch64
+Patch1:         %{name}-aarch64.patch
 
-BuildRequires:	gmp-devel
-BuildRequires:	libatlas-devel
+BuildRequires:  libatlas-devel
+BuildRequires:  gmp-devel
+%rename %{old_libname}
 
-Patch0:		iml-1.0.3-build.patch
-Patch1:		iml-1.0.3-leak.patch
 
 %description
-IML is a free library of C source code which implements algorithms for
-computing exact solutions to dense systems of linear equations over the
-integers. IML is designed to be used with the ATLAS/BLAS library and
-GMP bignum library. 
+IML provides efficient routines to compute exact solutions to dense
+systems of linear equations over the integers.  The following
+functionality is provided:
+- Nonsingular rational system solving.
+- Compute the right nullspace of an integer matrix.
+- Certified linear system solving.
 
-%files
-%dir %{_docdir}/%{name}
-%{_docdir}/%{name}/*
-%dir %{_datadir}/%{name}/examples
-%{_datadir}/%{name}/examples/*
 
-#-----------------------------------------------------------------------
-%package	-n %{libname}
-Group:		Development/C
-Summary:	IML - Integer Matrix Library library
-Provides:	libname%{name}-devel = %{version}-%{release}
+%package	devel
+Summary:        Development files for %{name}
 
-%description	-n %{libname}
-IML - Integer Matrix Library library.
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       libatlas-devel%{?_isa}, gmp-devel%{?_isa}
+%rename libname%{name}-devel
+%rename %{old_devname}
 
-%files		-n %{libname}
-%{_libdir}/*.so.*
+%description    devel
+The %{name}-devel package contains libraries and header files for
+developing applications that use %{name}.
 
-#-----------------------------------------------------------------------
-%package	-n %{devname}
-Group:		Development/C
-Summary:	IML - Integer Matrix Library development files
-Provides:	%{name}-devel = %{version}-%{release}
-Requires:	%{libname} = %{version}-%{release}
-Requires:	libatlas-devel
 
-%description	-n %{devname}
-IML- Integer Matrix Library development files.
-
-%files		-n %{devname}
-%{_includedir}/%{name}.h
-%{_libdir}/*.so
-
-#-----------------------------------------------------------------------
 %prep
 %setup -q
+%patch0
+%patch1
 
-%patch0 -p1
-%patch1 -p1
-rm -f config/*.m4
+# Fix a typo in iml 1.0.3
+sed 's/mpz_init_ui/mpz_init_set_ui/' src/nullspace.c > src/nullspace.c.fix
+touch -r src/nullspace.c src/nullspace.c.fix
+mv -f src/nullspace.c.fix src/nullspace.c
 
-#-----------------------------------------------------------------------
+# Adapt to recent ATLAS library structure
+sed -i 's/-lcblas -latlas/-lsatlas/' configure
+
 %build
-autoreconf -ifs
-%configure						\
-	--with-atlas-include=%{_includedir}/atlas	\
-	--with-atlas-lib=%{_libdir}/atlas		\
-	--disable-static				\
-	--enable-shared
+%configure2_5x --enable-shared --disable-static \
+  --with-atlas-include=%{_includedir}/atlas \
+  --with-atlas-lib=%{_libdir}/atlas \
+  LDFLAGS="-L%{_libdir}/atlas"
 
-%make
+# Remove an unnecessary direct shared library dependency
+sed -i 's/ -latlas//' src/Makefile
 
-#-----------------------------------------------------------------------
+make %{?_smp_mflags}
+
+
 %install
-%makeinstall_std
+make install DESTDIR=$RPM_BUILD_ROOT
+rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
+rm -fr $RPM_BUILD_ROOT%{_datadir}/%{name}
 
-mkdir -p %{buildroot}%{_docdir}
-mv -f %{buildroot}%{_datadir}/%{name} %{buildroot}%{_docdir}
-mkdir -p %{buildroot}%{_datadir}/%{name}/examples
-cp -fa examples/*.c examples/readme %{buildroot}%{_datadir}/%{name}/examples
+
+%check
+make check
+
+
+%post -p /sbin/ldconfig
+
+
+%postun -p /sbin/ldconfig
+
+
+%files
+%doc AUTHORS README
+%{_libdir}/lib%{name}.so.*
+
+
+%files devel
+%doc doc/liblink doc/libroutines examples
+%{_includedir}/*
+%{_libdir}/lib%{name}.so
