@@ -26,6 +26,11 @@ Patch0:         %{name}-no-repl.patch
 # Support building on aarch64
 Patch1:         %{name}-aarch64.patch
 
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool-base
+BuildRequires:	slibtool
+BuildRequires:	make
 BuildRequires:  libatlas-devel
 BuildRequires:  gmp-devel
 %rename %{old_libname}
